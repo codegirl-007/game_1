@@ -9,6 +9,7 @@ Game :: struct {
 	tilemap:   Tilemap,
 	camera:    Camera2D,
 	selection: Selection,
+	world:     World,
 }
 
 Camera2D :: struct {
@@ -34,6 +35,9 @@ game_init :: proc() -> Game {
 	}
 	g.tilemap = tilemap_init()
 	g.camera = camera_init()
+	g.world = world_init()
+	center := Tile_Coord{MAP_WIDTH / 2, MAP_HEIGHT / 2}
+	entity_spawn_colonist(&g.world.entities, center)
 	return g
 }
 
@@ -115,6 +119,8 @@ game_update :: proc(g: ^Game, dt: f32) {
 game_draw :: proc(g: ^Game) {
 	tilemap_draw(&g.tilemap, &g.camera)
 	tilemap_draw_selection(&g.tilemap, &g.camera, &g.selection)
+
+	world_draw(&g.world, &g.camera)
 
 	if g.selection.active {
 		rl.DrawText(
