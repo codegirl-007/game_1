@@ -11,7 +11,7 @@ main :: proc() {
 	game := game_init()
 	defer game_shutdown(&game)
 
-	for !rl.WindowShouldClose() {
+	for game.running && !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 		defer rl.EndDrawing()
 

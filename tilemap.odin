@@ -39,18 +39,23 @@ tile_color :: proc(type_id: u8) -> rl.Color {
 	}
 }
 
-tilemap_draw :: proc(tilemap: ^Tilemap) {
+tilemap_draw :: proc(tilemap: ^Tilemap, camera: ^Camera2D) {
+	tile_px := f32(TILE_SIZE) * camera.zoom
+
 	for y in 0 ..< tilemap.height {
 		for x in 0 ..< tilemap.width {
+			wx := f32(x * TILE_SIZE)
+			wy := f32(y * TILE_SIZE)
+			sx, sy := world_to_screen(camera, wx, wy)
+
+			if sx + tile_px < 0 || sy + tile_px < 0 {continue}
+			if sx > f32(WINDOW_WIDTH) || sy > f32(WINDOW_HEIGHT) {continue}
+
 			index := tile_index(tilemap, x, y)
-			type_id := tilemap.tiles[index]
-			color := tile_color(type_id)
+			color := tile_color(tilemap.tiles[index])
 
-			px := i32(x * TILE_SIZE)
-			py := i32(y * TILE_SIZE)
-
-			rl.DrawRectangle(px, py, TILE_SIZE, TILE_SIZE, color)
-			rl.DrawRectangleLines(px, py, TILE_SIZE, TILE_SIZE, {40, 50, 38, 255})
+			rl.DrawRectangle(i32(sx), i32(sy), i32(tile_px), i32(tile_px), color)
+			rl.DrawRectangleLines(i32(sx), i32(sy), i32(tile_px), i32(tile_px), {40, 50, 38, 255})
 		}
 	}
 }
