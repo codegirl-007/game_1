@@ -39,6 +39,20 @@ tile_color :: proc(type_id: u8) -> rl.Color {
 	}
 }
 
+tilemap_draw_selection :: proc(tilemap: ^Tilemap, cam: ^Camera2D, selection: ^Selection) {
+	if !selection.active {
+		return
+	}
+
+	wx := f32(selection.tile.x * TILE_SIZE)
+	wy := f32(selection.tile.y * TILE_SIZE)
+	sx, sy := world_to_screen(cam, wx, wy)
+	tile_px := f32(TILE_SIZE) * cam.zoom
+
+	highlight := rl.Color{255, 220, 80, 120}
+	rl.DrawRectangle(i32(sx), i32(sy), i32(tile_px), i32(tile_px), highlight)
+	rl.DrawRectangleLines(i32(sx), i32(sy), i32(tile_px), i32(tile_px), rl.GOLD)
+}
 tilemap_draw :: proc(tilemap: ^Tilemap, camera: ^Camera2D) {
 	tile_px := f32(TILE_SIZE) * camera.zoom
 

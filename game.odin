@@ -4,15 +4,25 @@ import "core:math"
 import rl "vendor:raylib"
 
 Game :: struct {
-	running: bool,
-	time:    f32, // total time elapsed
-	tilemap: Tilemap,
-	camera:  Camera2D,
+	running:   bool,
+	time:      f32, // total time elapsed
+	tilemap:   Tilemap,
+	camera:    Camera2D,
+	selection: Selection,
 }
 
 Camera2D :: struct {
 	offset: rl.Vector2,
 	zoom:   f32,
+}
+
+Tile_Coord :: struct {
+	x, y: int,
+}
+
+Selection :: struct {
+	active: bool,
+	tile:   Tile_Coord,
 }
 
 CAMERA_PAN_SPEED :: 400
@@ -66,6 +76,31 @@ screen_to_world :: proc(camera: ^Camera2D, sx, sy: f32) -> (f32, f32) {
 	return world_x, world_y
 }
 
+world_to_tile :: proc(wx, wy: f32) -> (int, int) {
+	tile_x := int(math.floor(wx / f32(TILE_SIZE)))
+	tile_y := int(math.floor(wy / f32(TILE_SIZE)))
+	return tile_x, tile_y
+}
+
+game_handle_input :: proc(g: ^Game) {
+	if rl.IsMouseButtonPressed(.LEFT) {
+		mouse_x := f32(rl.GetMouseX())
+		mouse_y := f32(rl.GetMouseY())
+		world_x, world_y := screen_to_world(&g.camera, mouse_x, mouse_y)
+		tile_x, tile_y := world_to_tile(world_x, world_y)
+
+		if tile_in_bounds(&g.tilemap, tile_x, tile_y) {
+			g.selection.active = true
+			g.selection.tile = {tile_x, tile_y}
+		} else {
+			g.selection.active = false
+		}
+	}
+
+	if rl.IsMouseButtonPressed(.RIGHT) {
+		g.selection.active = false
+	}
+}
 game_update :: proc(g: ^Game, dt: f32) {
 	g.time += dt
 
@@ -74,14 +109,26 @@ game_update :: proc(g: ^Game, dt: f32) {
 	}
 
 	camera_update(&g.camera, dt)
+	game_handle_input(g)
 }
 
 game_draw :: proc(g: ^Game) {
 	tilemap_draw(&g.tilemap, &g.camera)
+	tilemap_draw_selection(&g.tilemap, &g.camera, &g.selection)
+
+	if g.selection.active {
+		rl.DrawText(
+			rl.TextFormat("Selection: (%i,%i)", g.selection.tile.x, g.selection.tile.y),
+			10,
+			108,
+			20,
+			rl.GOLD,
+		)
+	}
 	fps := rl.GetFPS()
 	rl.DrawText(rl.TextFormat("FPS: %i", fps), 10, 36, 20, rl.GREEN)
 	rl.DrawText(rl.TextFormat("Time: %.1fs", g.time), 10, 62, 20, rl.GRAY)
-	rl.DrawText(rl.TextFormat("Zoom: %2f", g.camera.zoom), 10, 88, 20, rl.GRAY)
+	rl.DrawText(rl.TextFormat("Zoom: %.2f", g.camera.zoom), 10, 88, 20, rl.GRAY)
 }
 
 game_shutdown :: proc(g: ^Game) {
