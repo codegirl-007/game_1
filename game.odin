@@ -4,12 +4,13 @@ import "core:math"
 import rl "vendor:raylib"
 
 Game :: struct {
-	running:   bool,
-	time:      f32, // total time elapsed
-	tilemap:   Tilemap,
-	camera:    Camera2D,
-	selection: Selection,
-	world:     World,
+	running:         bool,
+	time:            f32, // total time elapsed
+	tilemap:         Tilemap,
+	camera:          Camera2D,
+	selection:       Selection,
+	world:           World,
+	player_colonist: Entity,
 }
 
 Camera2D :: struct {
@@ -37,7 +38,7 @@ game_init :: proc() -> Game {
 	g.camera = camera_init()
 	g.world = world_init()
 	center := Tile_Coord{MAP_WIDTH / 2, MAP_HEIGHT / 2}
-	entity_spawn_colonist(&g.world.entities, center)
+	g.player_colonist = entity_spawn_colonist(&g.world.entities, center)
 	return g
 }
 
@@ -102,7 +103,14 @@ game_handle_input :: proc(g: ^Game) {
 	}
 
 	if rl.IsMouseButtonPressed(.RIGHT) {
-		g.selection.active = false
+		mx, my := f32(rl.GetMouseX()), f32(rl.GetMouseY())
+		wx, wy := screen_to_world(&g.camera, mx, my)
+		tx, ty := world_to_tile(wx, wy)
+		if tile_in_bounds(&g.tilemap, tx, ty) {
+			entity_set_move_target(&g.world.entities, g.player_colonist, {tx, ty})
+			g.selection.active = true
+			g.selection.tile = {tx, ty}
+		}
 	}
 }
 game_update :: proc(g: ^Game, dt: f32) {
@@ -114,6 +122,7 @@ game_update :: proc(g: ^Game, dt: f32) {
 
 	camera_update(&g.camera, dt)
 	game_handle_input(g)
+	world_update(&g.world, dt)
 }
 
 game_draw :: proc(g: ^Game) {

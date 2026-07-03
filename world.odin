@@ -14,3 +14,7 @@ world_draw :: proc(w: ^World, camera: ^Camera2D) {
 	entity_draw(&w.entities, camera)
 }
 
+world_update :: proc(world: ^World, dt: f32) {
+	entity_update_movement(&world.entities, dt)
+}
+
