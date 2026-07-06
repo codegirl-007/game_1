@@ -27,6 +27,11 @@ entity_world_init :: proc() -> Entity_World {
 	return Entity_World{}
 }
 
+entity_world_destroy :: proc(ew: ^Entity_World) {
+	for i in 0 ..< MAX_ENTITIES {
+		path_destroy(&ew.path[i])
+	}
+}
 entity_spawn_colonist :: proc(ew: ^Entity_World, pos: Tile_Coord) -> Entity {
 	for i in 0 ..< MAX_ENTITIES {
 		if !ew.active[i] {

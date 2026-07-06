@@ -207,3 +207,9 @@ path_reconstruct :: proc(
 	return true
 }
 
+path_destroy :: proc(path: ^Path) {
+	delete(path.tiles)
+	path.tiles = nil
+	path.count = 0
+}
+

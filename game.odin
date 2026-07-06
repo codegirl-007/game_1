@@ -147,6 +147,7 @@ game_draw :: proc(g: ^Game) {
 }
 
 game_shutdown :: proc(g: ^Game) {
+	entity_world_destroy(&g.world.entities)
 	tilemap_destroy(&g.tilemap)
 }
 
