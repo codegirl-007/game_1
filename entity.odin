@@ -91,7 +91,7 @@ entity_set_move_target :: proc(
 		return false
 	}
 	ew.path_index[i] = 1
-	if ew.path[i].count <= 1 {
+	if len(ew.path[i].tiles) <= 1 {
 		ew.move_state[i] = .Idle
 	} else {
 		ew.move_state[i] = .Moving
@@ -118,7 +118,7 @@ entity_update_movement :: proc(ew: ^Entity_World, dt: f32) {
 
 		p := &ew.path[i]
 
-		if ew.path_index[i] >= p.count {
+		if ew.path_index[i] >= len(p.tiles) {
 			ew.move_state[i] = .Idle
 			continue
 		}
@@ -137,7 +137,7 @@ entity_update_movement :: proc(ew: ^Entity_World, dt: f32) {
 			ew.visual_position[i] = goal
 			ew.path_index[i] += 1
 
-			if ew.path_index[i] >= p.count {
+			if ew.path_index[i] >= len(p.tiles) {
 				ew.move_state[i] = .Idle
 			}
 		} else {
@@ -147,7 +147,7 @@ entity_update_movement :: proc(ew: ^Entity_World, dt: f32) {
 				ew.position[i] = next
 				ew.path_index[i] += 1
 
-				if ew.path_index[i] >= p.count {
+				if ew.path_index[i] >= len(p.tiles) {
 					ew.move_state[i] = .Idle
 				}
 

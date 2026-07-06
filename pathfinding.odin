@@ -2,14 +2,12 @@ package main
 
 Path :: struct {
 	tiles: [dynamic]Tile_Coord,
-	count: int,
 }
 
 max_path_int :: 1_000_000_000
 
 path_clear :: proc(path: ^Path) {
 	resize(&path.tiles, 0)
-	path.count = 0
 }
 
 pathfind_bfs :: proc(tilemap: ^Tilemap, start, goal: Tile_Coord, path: ^Path) -> bool {
@@ -18,7 +16,6 @@ pathfind_bfs :: proc(tilemap: ^Tilemap, start, goal: Tile_Coord, path: ^Path) ->
 	if start == goal {
 		resize(&path.tiles, 1)
 		path.tiles[0] = start
-		path.count = 1
 		return true
 	}
 
@@ -83,7 +80,6 @@ pathfind_astar :: proc(tm: ^Tilemap, start, goal: Tile_Coord, path: ^Path) -> bo
 	if start == goal {
 		resize(&path.tiles, 1)
 		path.tiles[0] = start
-		path.count = 1
 		return true
 	}
 
@@ -198,7 +194,6 @@ path_reconstruct :: proc(
 	}
 
 	resize(&path.tiles, rev_count)
-	path.count = rev_count
 
 	for i in 0 ..< rev_count {
 		path.tiles[i] = rev[rev_count - 1 - i]
@@ -210,6 +205,5 @@ path_reconstruct :: proc(
 path_destroy :: proc(path: ^Path) {
 	delete(path.tiles)
 	path.tiles = nil
-	path.count = 0
 }
 
