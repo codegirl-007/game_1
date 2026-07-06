@@ -15,8 +15,17 @@ tilemap_init :: proc() -> Tilemap {
 		tiles  = make([]u8, MAP_WIDTH * MAP_HEIGHT),
 	}
 	// test wall
-	for x in 15 ..< 25 {
-		tm.tiles[tile_index(&tm, x, 12)] = 1
+	// Horizontal mud strip (expensive, cost 20 per step)
+	for y in 8 ..< 18 {
+		tm.tiles[tile_index(&tm, 5, y)] = 3 // mud
+	}
+	// Road detour (cheap, cost 1 per step) — goes right, down, left
+	for x in 5 ..< 12 {
+		tm.tiles[tile_index(&tm, x, 8)] = 2 // road top
+		tm.tiles[tile_index(&tm, x, 18)] = 2 // road bottom
+	}
+	for y in 8 ..< 19 {
+		tm.tiles[tile_index(&tm, 11, y)] = 2 // road right side
 	}
 	return tm
 }
@@ -39,6 +48,12 @@ tile_color :: proc(type_id: u8) -> rl.Color {
 	switch type_id {
 	case 0:
 		return {72, 112, 68, 255}
+	case 1:
+		return {90, 90, 95, 255} // wall — gray
+	case 2:
+		return {160, 140, 100, 255} // road — tan/brown
+	case 3:
+		return {120, 100, 70, 255} // mud — darker brown
 	case:
 		return rl.MAGENTA
 	}
@@ -85,5 +100,21 @@ tile_walkable :: proc(tilemap: ^Tilemap, x, y: int) -> bool {
 	idx := tile_index(tilemap, x, y)
 
 	return tilemap.tiles[idx] != 1
+}
+
+tile_cost :: proc(tm: ^Tilemap, x, y: int) -> int {
+	if !tile_walkable(tm, x, y) {
+		return max_path_int
+	}
+	switch tm.tiles[tile_index(tm, x, y)] {
+	case 0:
+		return 10
+	case 2:
+		return 1
+	case 3:
+		return 20
+	case:
+		return 10
+	}
 }
 

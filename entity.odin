@@ -82,7 +82,7 @@ entity_set_move_target :: proc(
 	}
 
 	start := ew.position[i]
-	if !pathfind_bfs(tm, start, target, &ew.path[i]) {
+	if !pathfind_astar(tm, start, target, &ew.path[i]) {
 		return false
 	}
 	ew.path_index[i] = 1
